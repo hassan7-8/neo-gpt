@@ -2,10 +2,10 @@ This is the [assistant-ui](https://github.com/Yonom/assistant-ui) starter projec
 
 ## Getting Started
 
-First, add your OpenAI API key to `.env.local` file:
+First, add your Pollinations API key (get it at https://enter.pollinations.ai/keys) to a `.env.local` file:
 
 ```
-OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+POLLINATIONS_API_KEY=sk_xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 Then, run the development server:
