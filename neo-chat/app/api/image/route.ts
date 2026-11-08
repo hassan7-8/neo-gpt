@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/supabase/require-user";
+import { requireUser } from "@/lib/supabase/get-user";
 export const maxDuration = 60;
 
 const IMAGE_BASE = "https://gen.pollinations.ai/image";

@@ -2,8 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_KEY, SUPABASE_URL, authConfigured } from "./config";
 
-const PUBLIC_PATHS = ["/auth"];
-
 export async function updateSession(request: NextRequest) {
   // Login is not configured yet: behave like the app did before auth existed.
   if (!authConfigured) return NextResponse.next({ request });
@@ -26,19 +24,7 @@ export async function updateSession(request: NextRequest) {
   });
 
   // Do not run code between createServerClient and getUser().
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-
-  if (!user && !isPublic) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth";
-    url.search = "";
-    return NextResponse.redirect(url);
-  }
+  await supabase.auth.getUser();
 
   return response;
 }

@@ -6,9 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const rawNext = searchParams.get("next") ?? "/";
+  const rawNext = searchParams.get("next") ?? "/chat";
   // Only allow same-site relative redirects.
-  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/chat";
 
   if (authConfigured && code) {
     const supabase = await createClient();

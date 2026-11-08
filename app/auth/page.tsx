@@ -13,16 +13,16 @@ export const metadata: Metadata = {
 export default async function AuthPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; mode?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, mode } = await searchParams;
 
   if (authConfigured) {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (user) redirect("/");
+    if (user) redirect("/chat");
   }
 
   return (
@@ -34,15 +34,25 @@ export default async function AuthPage({
         <div className="w-full lg:w-1/2">
           <div className="anim-slideup bg-coral/10 text-coral ring-coral/25 mb-5 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium ring-1">
             <span className="bg-coral size-2 rounded-full" />
-            Welcome
+            {mode === "login" ? "Welcome back" : "Welcome"}
           </div>
           <h1
             className="anim-slideup font-display text-balance text-4xl font-semibold leading-none sm:text-5xl"
             style={{ animationDelay: "80ms" }}
           >
-            Sign up. Chat
-            <br />
-            in 10 seconds.
+            {mode === "login" ? (
+              <>
+                Log in.
+                <br />
+                Pick up the thread.
+              </>
+            ) : (
+              <>
+                Sign up. Chat
+                <br />
+                in 10 seconds.
+              </>
+            )}
           </h1>
           <p
             className="anim-slideup text-ink/70 mt-5 max-w-[38ch] text-pretty"
@@ -67,7 +77,7 @@ export default async function AuthPage({
 
         <div className="w-full lg:w-1/2">
           {authConfigured ? (
-            <AuthForm initialError={error} />
+            <AuthForm initialError={error} initialMode={mode === "login" ? "login" : "signup"} />
           ) : (
             <div className="bg-paper shadow-pop-sm ring-ink/5 rounded-3xl p-6 text-sm ring-1">
               <p className="font-display text-lg font-semibold">Login isn&apos;t set up yet</p>
