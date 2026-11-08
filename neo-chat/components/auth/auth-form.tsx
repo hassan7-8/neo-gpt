@@ -3,9 +3,17 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { AppleIcon, GoogleIcon, MicrosoftIcon } from "./provider-icons";
+import {
+  AppleIcon,
+  DiscordIcon,
+  FacebookIcon,
+  GithubIcon,
+  GoogleIcon,
+  MicrosoftIcon,
+} from "./provider-icons";
 
-type Provider = "google" | "azure" | "apple";
+type Provider = "google" | "azure" | "apple" | "github" | "discord" | "facebook";
+type Mode = "signup" | "login" | "reset";
 type Notice = { kind: "error" | "info"; text: string } | null;
 
 const PROVIDERS: { id: Provider; label: string; icon: React.ReactNode }[] = [
@@ -14,12 +22,24 @@ const PROVIDERS: { id: Provider; label: string; icon: React.ReactNode }[] = [
   { id: "apple", label: "Apple", icon: <AppleIcon /> },
 ];
 
+const MORE_PROVIDERS: { id: Provider; label: string; icon: React.ReactNode }[] = [
+  { id: "github", label: "GitHub", icon: <GithubIcon /> },
+  { id: "discord", label: "Discord", icon: <DiscordIcon /> },
+  { id: "facebook", label: "Facebook", icon: <FacebookIcon /> },
+];
+
 const inputClass =
   "w-full rounded-xl bg-paper px-3 py-2.5 text-sm outline-none ring-1 ring-ink/5 transition focus:ring-2 focus:ring-mint";
 
-export function AuthForm({ initialError }: { initialError?: string }) {
+export function AuthForm({
+  initialError,
+  initialMode = "signup",
+}: {
+  initialError?: string;
+  initialMode?: "signup" | "login";
+}) {
   const router = useRouter();
-  const [mode, setMode] = useState<"signup" | "login">("signup");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -34,7 +54,16 @@ export function AuthForm({ initialError }: { initialError?: string }) {
     setNotice(null);
     const supabase = createClient();
     try {
-      if (mode === "signup") {
+      if (mode === "reset") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset`,
+        });
+        if (error) throw error;
+        setNotice({
+          kind: "info",
+          text: "If that email has an account, a reset link is on its way. Check your inbox.",
+        });
+      } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -42,7 +71,7 @@ export function AuthForm({ initialError }: { initialError?: string }) {
         });
         if (error) throw error;
         if (data.session) {
-          router.replace("/");
+          router.replace("/chat");
           router.refresh();
         } else {
           setNotice({
@@ -54,7 +83,7 @@ export function AuthForm({ initialError }: { initialError?: string }) {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.replace("/");
+        router.replace("/chat");
         router.refresh();
       }
     } catch (err) {
@@ -86,6 +115,14 @@ export function AuthForm({ initialError }: { initialError?: string }) {
       onSubmit={submit}
       className="anim-bouncein bg-cream shadow-pop ring-ink/5 rounded-3xl p-6 ring-1"
     >
+      {mode === "reset" ? (
+        <div className="mb-5">
+          <p className="font-display text-xl font-semibold">Reset your password</p>
+          <p className="text-ink/60 mt-1 text-sm">
+            Enter your email and we&apos;ll send you a link to choose a new password.
+          </p>
+        </div>
+      ) : (
       <div className="bg-ink/5 mb-5 flex gap-1 rounded-xl p-1 text-sm font-semibold">
         {(["signup", "login"] as const).map((m) => (
           <button
@@ -103,7 +140,10 @@ export function AuthForm({ initialError }: { initialError?: string }) {
           </button>
         ))}
       </div>
+      )}
 
+      {mode !== "reset" && (
+      <>
       <div className="grid gap-2">
         {PROVIDERS.map((p) => (
           <button
@@ -118,11 +158,28 @@ export function AuthForm({ initialError }: { initialError?: string }) {
         ))}
       </div>
 
+      <div className="mt-2 grid grid-cols-3 gap-2">
+        {MORE_PROVIDERS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => void oauth(p.id)}
+            aria-label={`Continue with ${p.label}`}
+            className="press lift bg-paper ring-ink/5 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium ring-1"
+          >
+            {p.icon}
+            <span className="hidden sm:inline">{p.label}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="text-ink/40 my-4 flex items-center gap-3 text-xs">
         <span className="bg-ink/10 h-px flex-1" />
         or use your email
         <span className="bg-ink/10 h-px flex-1" />
       </div>
+      </>
+      )}
 
       <label htmlFor="email" className="text-ink/50 block text-xs font-semibold uppercase tracking-wide">
         Email
@@ -137,6 +194,8 @@ export function AuthForm({ initialError }: { initialError?: string }) {
         placeholder="you@email.com"
         className={`${inputClass} mb-4 mt-1`}
       />
+      {mode !== "reset" && (
+      <>
       <label htmlFor="password" className="text-ink/50 block text-xs font-semibold uppercase tracking-wide">
         Password
       </label>
@@ -149,8 +208,23 @@ export function AuthForm({ initialError }: { initialError?: string }) {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         placeholder="••••••••"
-        className={`${inputClass} mb-5 mt-1`}
+        className={`${inputClass} mt-1`}
       />
+      {mode === "login" && (
+        <button
+          type="button"
+          onClick={() => {
+            setMode("reset");
+            setNotice(null);
+          }}
+          className="text-ink/60 hover:text-ink mt-2 text-xs font-semibold underline underline-offset-4"
+        >
+          Forgot password?
+        </button>
+      )}
+      </>
+      )}
+      <div className="mb-5" />
 
       {notice && (
         <p
@@ -168,8 +242,26 @@ export function AuthForm({ initialError }: { initialError?: string }) {
         disabled={busy}
         className="press lift bg-mint text-ink ring-ink/5 w-full rounded-xl py-3 text-sm font-semibold ring-1 disabled:opacity-60"
       >
-        {busy ? "One sec…" : mode === "signup" ? "Create free account" : "Log in"}
+        {busy
+          ? "One sec…"
+          : mode === "signup"
+            ? "Create free account"
+            : mode === "login"
+              ? "Log in"
+              : "Send reset link"}
       </button>
+      {mode === "reset" && (
+        <button
+          type="button"
+          onClick={() => {
+            setMode("login");
+            setNotice(null);
+          }}
+          className="text-ink/60 hover:text-ink mt-4 block w-full text-center text-sm font-semibold"
+        >
+          ← Back to log in
+        </button>
+      )}
     </form>
   );
 }

@@ -1,4 +1,5 @@
-import { requireUser } from "@/lib/supabase/require-user";
+import { getUser } from "@/lib/supabase/get-user";
+import { guestLimited, GUEST_MESSAGE_LIMIT } from "@/lib/guest-limit";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createDataStreamResponse, streamText } from "ai";
 
@@ -50,8 +51,8 @@ function textResponse(text: string) {
 }
 
 export async function POST(req: Request) {
-  const denied = await requireUser();
-  if (denied) return denied;
+  const { configured, user } = await getUser();
+  const guest = configured && !user;
 
   const { messages } = await req.json();
 
@@ -59,6 +60,9 @@ export async function POST(req: Request) {
   if (last?.role === "user") {
     const match = messageText(last).trim().match(IMAGE_COMMAND);
     if (match) {
+      if (guest) {
+        return textResponse("Image generation is for logged-in users. Please log in or sign up (it's free) to draw pictures.");
+      }
       const prompt = match[1].trim().slice(0, 500);
       if (!prompt) {
         return textResponse("Tell me what to draw, for example: `/image a cat in space`");
@@ -68,6 +72,12 @@ export async function POST(req: Request) {
       const alt = prompt.replace(/[[\]\n]/g, " ");
       return textResponse(`![${alt}](${src})`);
     }
+  }
+
+  if (guest && guestLimited(req)) {
+    return textResponse(
+      `You've used your ${GUEST_MESSAGE_LIMIT} free guest messages for now. Please log in or sign up (it's free) to keep chatting.`,
+    );
   }
 
   const result = streamText({
