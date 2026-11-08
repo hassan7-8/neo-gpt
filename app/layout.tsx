@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { DM_Sans, Fredoka } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
+const fredoka = Fredoka({ subsets: ["latin"], variable: "--font-fredoka" });
 
 export const metadata: Metadata = {
-  title: "Neo GPT",
-  description: "Neo GPT chat assistant",
+  title: "Cheap Mind AI",
+  description: "Chat with Cheap Mind AI: fast answers and image generation in one clean screen.",
 };
 
 export default function RootLayout({
@@ -23,7 +24,7 @@ export default function RootLayout({
           name="google-site-verification"
           content="UrUZ-nqxdKB5WZkoimEGyxPtGy0IG5PYj_KS4QD1Rso"
         />
-        
+
         {/* Google AdSense Script */}
         <Script
           async
@@ -32,7 +33,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={`${dmSans.variable} ${fredoka.variable} ${dmSans.className}`}>{children}</body>
     </html>
   );
 }
