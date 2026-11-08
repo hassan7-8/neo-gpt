@@ -87,10 +87,10 @@ const defaultComponents = memoizeMarkdownComponents({
     <p className={cn("mb-5 mt-5 leading-7 first:mt-0 last:mb-0", className)} {...props} />
   ),
   a: ({ className, ...props }) => (
-    <a className={cn("text-primary font-medium underline underline-offset-4", className)} {...props} />
+    <a className={cn("text-foreground decoration-mint font-semibold underline decoration-2 underline-offset-4", className)} {...props} />
   ),
   blockquote: ({ className, ...props }) => (
-    <blockquote className={cn("border-l-2 pl-6 italic", className)} {...props} />
+    <blockquote className={cn("border-mint border-l-4 pl-6 italic", className)} {...props} />
   ),
   ul: ({ className, ...props }) => (
     <ul className={cn("my-5 ml-6 list-disc [&>li]:mt-2", className)} {...props} />
@@ -113,17 +113,26 @@ const defaultComponents = memoizeMarkdownComponents({
   tr: ({ className, ...props }) => (
     <tr className={cn("m-0 border-b p-0 first:border-t [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg", className)} {...props} />
   ),
+  img: ({ className, alt, ...props }) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      alt={alt ?? ""}
+      loading="lazy"
+      className={cn("anim-bouncein my-3 w-full max-w-sm rounded-2xl bg-muted ring-1 ring-ink/10", className)}
+      {...props}
+    />
+  ),
   sup: ({ className, ...props }) => (
     <sup className={cn("[&>a]:text-xs [&>a]:no-underline", className)} {...props} />
   ),
   pre: ({ className, ...props }) => (
-    <pre className={cn("overflow-x-auto rounded-b-lg bg-black p-4 text-white", className)} {...props} />
+    <pre className={cn("overflow-x-auto rounded-b-2xl bg-ink p-4 text-cream", className)} {...props} />
   ),
   code: function Code({ className, ...props }) {
     const isCodeBlock = useIsMarkdownCodeBlock();
     return (
       <code
-        className={cn(!isCodeBlock && "bg-muted rounded border font-semibold", className)}
+        className={cn(!isCodeBlock && "bg-ink/5 rounded-md px-1.5 py-0.5 font-semibold", className)}
         {...props}
       />
     );

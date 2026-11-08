@@ -1,3 +1,4 @@
+import { requireUser } from "@/lib/supabase/require-user";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createDataStreamResponse, streamText } from "ai";
 
@@ -49,6 +50,9 @@ function textResponse(text: string) {
 }
 
 export async function POST(req: Request) {
+  const denied = await requireUser();
+  if (denied) return denied;
+
   const { messages } = await req.json();
 
   const last: ChatMessage | undefined = messages[messages.length - 1];

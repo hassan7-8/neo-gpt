@@ -1,9 +1,13 @@
+import { requireUser } from "@/lib/supabase/require-user";
 export const maxDuration = 60;
 
 const IMAGE_BASE = "https://gen.pollinations.ai/image";
 const IMAGE_MODEL = "flux";
 
 export async function GET(req: Request) {
+  const denied = await requireUser();
+  if (denied) return denied;
+
   const { searchParams } = new URL(req.url);
   const prompt = (searchParams.get("prompt") ?? "").trim().slice(0, 500);
   const seed = Number.parseInt(searchParams.get("seed") ?? "", 10);
