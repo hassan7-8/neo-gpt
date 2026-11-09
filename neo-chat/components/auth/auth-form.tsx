@@ -3,15 +3,15 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { FacebookIcon, GoogleIcon, MicrosoftIcon } from "./provider-icons";
+import { FacebookIcon, GoogleIcon, LinkedInIcon } from "./provider-icons";
 
-type Provider = "google" | "azure" | "facebook";
+type Provider = "google" | "linkedin_oidc" | "facebook";
 type Mode = "signup" | "login" | "reset";
 type Notice = { kind: "error" | "info"; text: string } | null;
 
 const PROVIDERS: { id: Provider; label: string; icon: React.ReactNode }[] = [
   { id: "google", label: "Google", icon: <GoogleIcon /> },
-  { id: "azure", label: "Microsoft", icon: <MicrosoftIcon /> },
+  { id: "linkedin_oidc", label: "LinkedIn", icon: <LinkedInIcon /> },
   { id: "facebook", label: "Facebook", icon: <FacebookIcon /> },
 ];
 
@@ -90,8 +90,6 @@ export function AuthForm({
       provider,
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
-        // Microsoft needs the email scope to return the address.
-        ...(provider === "azure" ? { scopes: "email" } : {}),
       },
     });
     if (error) setNotice({ kind: "error", text: error.message });
