@@ -10,7 +10,7 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  ["1", "Pick how to start", "Sign up with email, Google, Microsoft, Apple, GitHub, Discord or Facebook, or just try it as a guest."],
+  ["1", "Pick how to start", "Sign up with email, Google, Microsoft or Apple, or just try it as a guest."],
   ["2", "Say what you need", "Write your question or idea in plain words, like you would to a friend."],
   ["3", "Get your answer", "Read the reply, ask a follow-up, or turn your idea into a picture with /image."],
 ];
