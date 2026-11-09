@@ -12,6 +12,7 @@ import remarkGfm from "remark-gfm";
 import { FC, memo, useState } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
 
+import { GeneratedImage } from "@/components/assistant-ui/generated-image";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { cn } from "@/lib/utils";
 
@@ -113,15 +114,7 @@ const defaultComponents = memoizeMarkdownComponents({
   tr: ({ className, ...props }) => (
     <tr className={cn("m-0 border-b p-0 first:border-t [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg", className)} {...props} />
   ),
-  img: ({ className, alt, ...props }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      alt={alt ?? ""}
-      loading="lazy"
-      className={cn("anim-bouncein my-3 w-full max-w-sm rounded-2xl bg-muted ring-1 ring-ink/10", className)}
-      {...props}
-    />
-  ),
+  img: ({ alt, src }) => <GeneratedImage src={typeof src === "string" ? src : ""} alt={alt ?? ""} />,
   sup: ({ className, ...props }) => (
     <sup className={cn("[&>a]:text-xs [&>a]:no-underline", className)} {...props} />
   ),
