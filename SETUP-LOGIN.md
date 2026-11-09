@@ -26,6 +26,7 @@ Paste that into the provider's console.
 - **Microsoft (Azure):** Entra ID -> App registrations -> New (accounts in any directory + personal).
   Redirect URI (Web) = the Supabase callback URL. Create a client secret. Paste Application (client) ID,
   secret value and tenant URL (`https://login.microsoftonline.com/common`) into Supabase.
-- **Apple:** needs a paid Apple Developer account. Create an App ID + Services ID with
-  "Sign in with Apple", set the Supabase callback URL as the return URL, create a key, then
-  generate the client secret (a JWT, valid max 6 months) as described in Supabase's Apple guide.
+- **Facebook:** developers.facebook.com -> My Apps -> Create App (use case: "Authenticate and request data
+  from users with Facebook Login"). Settings -> Basic: copy App ID and App Secret, add a Privacy Policy URL and
+  set Category. Facebook Login -> Settings: Valid OAuth Redirect URIs = the Supabase callback URL.
+  Paste App ID + App Secret into Supabase (Facebook provider). Switch the app from Development to Live to let anyone in.
