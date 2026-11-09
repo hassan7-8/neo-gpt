@@ -23,7 +23,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "account", label: "Account" },
 ];
 
-const PROVIDER_NAMES: Record<string, string> = { email: "Email & password", google: "Google", facebook: "Facebook" };
+const PROVIDER_NAMES: Record<string, string> = { email: "Email & password", google: "Google", x: "X (Twitter)" };
 const fmt = (iso: string) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "—");
 
 function NoticeBox({ n }: { n: Notice }): ReactNode {
@@ -286,7 +286,7 @@ export function ProfileForm({ initial }: { initial: Profile }) {
         <div className="space-y-5">
           <form onSubmit={changePassword} className="bg-paper ring-ink/10 rounded-3xl p-6 ring-1">
             <p className="font-display text-xl font-semibold">Change password</p>
-            <p className="text-ink/55 mb-4 mt-1 text-sm">If you log in with Google or Facebook you can still add a password here.</p>
+            <p className="text-ink/55 mb-4 mt-1 text-sm">If you log in with Google or X you can still add a password here.</p>
             <label htmlFor="pw" className={label}>New password</label>
             <input id="pw" type="password" minLength={6} required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={`${field} mb-4 mt-1`} />
             <NoticeBox n={notice} />
