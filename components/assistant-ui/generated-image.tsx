@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ImageIcon, RefreshCwIcon } from "lucide-react";
+import { deleteEditPhotos } from "@/lib/upload-photo";
 
 const STATUS_STEPS = [
   { after: 0, text: "Creating your image…" },
@@ -22,6 +23,15 @@ export function GeneratedImage({ src, alt }: { src: string; alt: string }) {
     return () => clearInterval(id);
   }, [status, attempt]);
 
+  const isEdit = src.startsWith("/api/edit");
+
+  // Uploaded source photos are temporary: remove them once the result has loaded.
+  useEffect(() => {
+    if (status !== "done" || !isEdit) return;
+    const paths = new URLSearchParams(src.split("?")[1] ?? "").get("src");
+    if (paths) void deleteEditPhotos(paths.split(",").filter(Boolean));
+  }, [status, isEdit, src]);
+
   const url = attempt === 0 ? src : `${src}${src.includes("?") ? "&" : "?"}retry=${attempt}`;
   const message = [...STATUS_STEPS].reverse().find((s) => seconds >= s.after)?.text ?? STATUS_STEPS[0].text;
 
@@ -36,7 +46,7 @@ export function GeneratedImage({ src, alt }: { src: string; alt: string }) {
           alt={alt}
           onLoad={() => setStatus("done")}
           onError={() => setStatus("error")}
-          className={`absolute inset-0 size-full object-cover transition-opacity duration-500 ${
+          className={`absolute inset-0 size-full ${isEdit ? "object-contain" : "object-cover"} transition-opacity duration-500 ${
             status === "done" ? "opacity-100" : "opacity-0"
           }`}
         />
@@ -85,7 +95,7 @@ export function GeneratedImage({ src, alt }: { src: string; alt: string }) {
         )}
       </span>
       {status === "done" && alt && (
-        <span className="text-ink/50 mt-1.5 block text-xs">Nano Image · {alt}</span>
+        <span className="text-ink/50 mt-1.5 block text-xs">{isEdit ? "Nano Edit" : "Nano Image"} · {alt}</span>
       )}
     </span>
   );

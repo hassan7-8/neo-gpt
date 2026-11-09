@@ -14,7 +14,27 @@ export type Profile = {
   bio: string;
   color: string;
   email: string;
+  avatarUrl: string;
+  headline: string;
+  location: string;
+  website: string;
+  aiTone: string;
+  aiLanguage: string;
+  aiLength: string;
+  aiAbout: string;
+  providers: string[];
+  createdAt: string;
+  lastSignIn: string;
 };
+
+export const AI_TONES = [
+  { id: "", label: "Default" },
+  { id: "friendly", label: "Friendly" },
+  { id: "professional", label: "Professional" },
+  { id: "casual", label: "Casual" },
+  { id: "playful", label: "Playful" },
+  { id: "concise", label: "Very brief" },
+] as const;
 
 export function profileFromUser(user: User | null | undefined): Profile | null {
   if (!user) return null;
@@ -30,7 +50,22 @@ export function profileFromUser(user: User | null | undefined): Profile | null {
     bio: typeof meta.bio === "string" ? meta.bio : "",
     color: typeof meta.avatar_color === "string" ? meta.avatar_color : "gold",
     email,
+    avatarUrl: str(meta.avatar_url_custom),
+    headline: str(meta.headline),
+    location: str(meta.location),
+    website: str(meta.website),
+    aiTone: str(meta.ai_tone),
+    aiLanguage: str(meta.ai_language),
+    aiLength: str(meta.ai_length),
+    aiAbout: str(meta.ai_about),
+    providers: Array.isArray(user.app_metadata?.providers) ? (user.app_metadata.providers as string[]) : [],
+    createdAt: user.created_at ?? "",
+    lastSignIn: user.last_sign_in_at ?? "",
   };
+}
+
+function str(v: unknown): string {
+  return typeof v === "string" ? v : "";
 }
 
 export function initials(name: string): string {

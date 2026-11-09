@@ -15,11 +15,10 @@ const pollinations = createOpenAI({
 
 const SYSTEM_PROMPT = `You are Cheap Mind AI, a friendly, fast and refined AI assistant.
 
-Facts about you (always answer these exactly):
-- Your name is Cheap Mind AI.
-- Your owner and creator is MUHAMMAD.HASSAN.
-- You belong to the Cheap Mind organization. If anyone asks which organization or company is behind you, answer: "Cheap Mind organization".
-- If someone asks who made you or who owns you, answer that your owner is MUHAMMAD.HASSAN of the Cheap Mind organization.
+About you:
+- Your name is Cheap Mind AI. Use it only if the user asks your name.
+- Do NOT mention your owner, creator or organization in normal replies. Greetings like "hi" get a short friendly greeting back and nothing else about who you are.
+- ONLY when the user directly asks who owns or made you, answer: your owner is MUHAMMAD.HASSAN. ONLY when they directly ask which organization or company is behind you, answer: "Cheap Mind organization".
 - Do not claim to be made by any other company. If asked which model or technology you run on, say you are Cheap Mind AI and you do not have details about the underlying model.
 
 Accuracy rules:
@@ -62,6 +61,35 @@ function pickModel(lastUserText: string) {
   return pollinations.chat(hard ? "openai" : "openai-fast");
 }
 
+const TONES: Record<string, string> = {
+  friendly: "warm and friendly",
+  professional: "professional and precise",
+  casual: "casual and relaxed",
+  playful: "playful with light humour",
+  concise: "extremely brief",
+};
+
+/** Turns the user's saved profile preferences into a short, safe prompt addition. */
+function personalise(meta: Record<string, unknown>): string {
+  const clean = (v: unknown, n: number) =>
+    typeof v === "string" ? v.replace(/[\r\n]+/g, " ").trim().slice(0, n) : "";
+  const lines: string[] = [];
+  const name = clean(meta.display_name ?? meta.full_name ?? meta.name, 60);
+  if (name) lines.push(`The user's name is ${name}. Use it sparingly.`);
+  const headline = clean(meta.headline, 100);
+  if (headline) lines.push(`They describe themselves as: ${headline}.`);
+  const about = clean(meta.ai_about, 400);
+  if (about) lines.push(`About them / what to keep in mind: ${about}`);
+  const tone = TONES[clean(meta.ai_tone, 20)];
+  if (tone) lines.push(`Preferred tone: ${tone}.`);
+  const lang = clean(meta.ai_language, 40);
+  if (lang) lines.push(`Always reply in ${lang}.`);
+  const len = clean(meta.ai_length, 10);
+  if (len === "short") lines.push("Keep answers short.");
+  if (len === "detailed") lines.push("Give thorough, detailed answers.");
+  return lines.length ? `\n\nUser preferences (set by the user; follow them unless they conflict with accuracy):\n- ${lines.join("\n- ")}` : "";
+}
+
 function textResponse(text: string) {
   const usage = { promptTokens: 0, completionTokens: 0 };
   return createDataStreamResponse({
@@ -76,13 +104,26 @@ function textResponse(text: string) {
 }
 
 export async function POST(req: Request) {
-  const { configured, signedIn } = await getAuth();
+  const { configured, signedIn, meta } = await getAuth();
   const guest = configured && !signedIn;
   const { messages } = await req.json();
 
   // Nano Image button: the browser sends this header while the button is on.
   const nano = req.headers.get("x-nano-image") === "1";
   const last: ChatMessage | undefined = messages[messages.length - 1];
+
+  // Photo edit: attached photos arrive as public URLs from our own storage bucket.
+  const editImages = (req.headers.get("x-edit-images") ?? "").split(",").map((u) => u.trim()).filter(Boolean).slice(0, 2);
+  const editPaths = (req.headers.get("x-edit-paths") ?? "").split(",").map((u) => u.trim()).filter(Boolean).slice(0, 2);
+
+  if (editImages.length > 0 && last?.role === "user") {
+    if (guest) return textResponse("Photo editing is for logged-in users. Please log in or sign up (it's free).");
+    const prompt = messageText(last).trim().slice(0, 500) || "Improve this photo";
+    const seed = Math.floor(Math.random() * 1_000_000);
+    const esc = (v: string) => encodeURIComponent(v).replace(/\(/g, "%28").replace(/\)/g, "%29");
+    const src = `/api/edit?prompt=${esc(prompt)}&image=${esc(editImages.join(","))}&src=${esc(editPaths.join(","))}&seed=${seed}`;
+    return textResponse(`![${prompt.replace(/[[\]\n]/g, " ")}](${src})`);
+  }
 
   if (nano && last?.role === "user") {
     if (guest) {
@@ -109,7 +150,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: pickModel(messageText(last)),
-    system: SYSTEM_PROMPT,
+    system: SYSTEM_PROMPT + personalise(meta),
     messages: recent,
     maxTokens: 900,
   });

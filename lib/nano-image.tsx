@@ -1,6 +1,9 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
+import type { UploadedPhoto } from "@/lib/upload-photo";
+
+export const MAX_EDIT_PHOTOS = 2;
 
 type NanoImageContext = {
   /** True when the Nano Image button is switched on. */
@@ -8,6 +11,12 @@ type NanoImageContext = {
   setNano: (on: boolean) => void;
   /** Always-current value for use inside request callbacks. */
   nanoRef: { current: boolean };
+  /** Photos attached for Nano Edit. */
+  photos: UploadedPhoto[];
+  addPhoto: (p: UploadedPhoto) => void;
+  removePhoto: (path: string) => void;
+  /** Returns the attached photos and clears them (called when a message is sent). */
+  takePhotos: () => UploadedPhoto[];
 };
 
 const Ctx = createContext<NanoImageContext | null>(null);
@@ -15,11 +24,32 @@ const Ctx = createContext<NanoImageContext | null>(null);
 export function NanoImageProvider({ children }: { children: ReactNode }) {
   const [nano, setNanoState] = useState(false);
   const nanoRef = useRef(false);
+  const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
+  const photosRef = useRef<UploadedPhoto[]>([]);
+
   const setNano = useCallback((on: boolean) => {
     nanoRef.current = on;
     setNanoState(on);
   }, []);
-  const value = useMemo(() => ({ nano, setNano, nanoRef }), [nano, setNano]);
+  const addPhoto = useCallback((p: UploadedPhoto) => {
+    photosRef.current = [...photosRef.current, p].slice(0, MAX_EDIT_PHOTOS);
+    setPhotos(photosRef.current);
+  }, []);
+  const removePhoto = useCallback((path: string) => {
+    photosRef.current = photosRef.current.filter((x) => x.path !== path);
+    setPhotos(photosRef.current);
+  }, []);
+  const takePhotos = useCallback(() => {
+    const taken = photosRef.current;
+    photosRef.current = [];
+    setPhotos([]);
+    return taken;
+  }, []);
+
+  const value = useMemo(
+    () => ({ nano, setNano, nanoRef, photos, addPhoto, removePhoto, takePhotos }),
+    [nano, setNano, photos, addPhoto, removePhoto, takePhotos],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

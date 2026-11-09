@@ -16,13 +16,14 @@ export async function getUser() {
  * trip to Supabase when the project uses signing keys), so replies start sooner.
  */
 export async function getAuth() {
-  if (!authConfigured) return { configured: false as const, signedIn: false };
+  if (!authConfigured) return { configured: false as const, signedIn: false, meta: {} as Record<string, unknown> };
   const supabase = await createClient();
   try {
     const { data } = await supabase.auth.getClaims();
-    return { configured: true as const, signedIn: Boolean(data?.claims?.sub) };
+    const meta = (data?.claims?.user_metadata ?? {}) as Record<string, unknown>;
+    return { configured: true as const, signedIn: Boolean(data?.claims?.sub), meta };
   } catch {
-    return { configured: true as const, signedIn: false };
+    return { configured: true as const, signedIn: false, meta: {} as Record<string, unknown> };
   }
 }
 
