@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { ToolFallback } from "./tool-fallback";
+import { PhotoAttachButton, PhotoStrip } from "@/components/assistant-ui/photo-attach";
 
 export const Thread: FC = () => {
   return (
@@ -126,13 +127,14 @@ const ThreadWelcomeSuggestions: FC = () => {
 };
 
 const Composer: FC = () => {
-  const { nano } = useNanoImage();
+  const { nano, photos } = useNanoImage();
   return (
     <ComposerPrimitive.Root className="bg-paper ring-ink/5 focus-within:ring-mint flex w-full flex-wrap items-end rounded-2xl px-2.5 shadow-sm ring-1 transition focus-within:ring-2">
+      <PhotoStrip />
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
-        placeholder={nano ? "Describe the image you want…" : "Message Cheap Mind AI…"}
+        placeholder={photos.length > 0 ? "What should I change in the photo?" : nano ? "Describe the image you want…" : "Message Cheap Mind AI…"}
         className="placeholder:text-muted-foreground max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
       />
       <ComposerAction />
@@ -163,6 +165,7 @@ const NanoImageButton: FC = () => {
 const ComposerAction: FC = () => {
   return (
     <>
+      <PhotoAttachButton />
       <NanoImageButton />
       <ThreadPrimitive.If running={false}>
         <ComposerPrimitive.Send asChild>

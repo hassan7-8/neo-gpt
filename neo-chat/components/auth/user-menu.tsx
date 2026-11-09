@@ -86,7 +86,7 @@ export function UserMenu() {
         aria-label="Open profile menu"
         className="press flex items-center gap-2 rounded-full p-0.5 pr-3 transition-colors hover:bg-ink/5"
       >
-        <Avatar name={profile.name} color={profile.color} size={36} />
+        <Avatar name={profile.name} color={profile.color} url={profile.avatarUrl} size={36} />
         <span className="hidden max-w-[10rem] truncate text-sm font-semibold sm:inline">{profile.name}</span>
       </button>
 
@@ -96,7 +96,7 @@ export function UserMenu() {
           className="anim-pop bg-paper ring-ink/10 absolute right-0 z-30 mt-2 w-64 rounded-2xl p-2 shadow-xl ring-1"
         >
           <div className="flex items-center gap-3 px-3 py-3">
-            <Avatar name={profile.name} color={profile.color} size={44} />
+            <Avatar name={profile.name} color={profile.color} url={profile.avatarUrl} size={44} />
             <div className="min-w-0">
               <p className="font-display truncate text-base font-semibold">{profile.name}</p>
               <p className="text-ink/55 truncate text-xs">{profile.email}</p>

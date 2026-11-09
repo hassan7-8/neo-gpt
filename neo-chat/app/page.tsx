@@ -11,7 +11,7 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  ["I", "Choose how to begin", "Sign up with email, Google, LinkedIn or Facebook, or simply try it as a guest."],
+  ["I", "Choose how to begin", "Sign up with email, Google or Facebook, or simply try it as a guest."],
   ["II", "Say what you need", "Write your question or idea in plain words, the way you would to a friend."],
   ["III", "Receive your answer", "Read the reply, ask a follow-up, or tap Nano Image to turn an idea into art."],
 ];
@@ -20,7 +20,7 @@ const FAQ = [
   ["Is it really free?", "Yes. Guests can chat with a small free allowance, and a free account unlocks more, plus Nano Image."],
   ["Do I need to log in?", "No. You can try the chat right away. Logging in unlocks images and removes the guest limit."],
   ["Who owns Cheap Mind AI?", "Cheap Mind AI is owned and created by MUHAMMAD.HASSAN of the Cheap Mind organization."],
-  ["Is my account safe?", "Login is handled by Supabase. We never store passwords in our code, and you can sign in with Google, LinkedIn or Facebook instead of a password."],
+  ["Is my account safe?", "Login is handled by Supabase. We never store passwords in our code, and you can sign in with Google or Facebook instead of a password."],
 ];
 
 export const dynamic = "force-dynamic";

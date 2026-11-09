@@ -16,11 +16,19 @@ export const Assistant = () => (
 );
 
 const AssistantInner = () => {
-  const { nanoRef } = useNanoImage();
+  const { nanoRef, takePhotos } = useNanoImage();
   const runtime = useChatRuntime({
     api: "/api/chat",
     // Read on every request, so the Nano Image button takes effect immediately.
-    headers: async () => ({ "x-nano-image": nanoRef.current ? "1" : "0" }),
+    headers: async () => {
+      const photos = takePhotos();
+      return {
+        "x-nano-image": nanoRef.current ? "1" : "0",
+        // Attached photos switch the request into photo-edit mode.
+        "x-edit-images": photos.map((p) => p.url).join(","),
+        "x-edit-paths": photos.map((p) => p.path).join(","),
+      };
+    },
   });
 
   return (

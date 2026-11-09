@@ -17,13 +17,13 @@ export default async function ProfilePage() {
 
   return (
     <div className="bg-cream text-ink min-h-screen px-5 py-6 sm:px-8">
-      <header className="mx-auto flex max-w-xl items-center justify-between">
+      <header className="mx-auto flex max-w-2xl items-center justify-between">
         <Logo />
         <Link href="/chat" className="press bg-paper ring-ink/10 rounded-xl px-4 py-2 text-sm font-medium ring-1">
           ← Back to chat
         </Link>
       </header>
-      <div className="mx-auto mt-10 max-w-xl">
+      <div className="mx-auto mt-10 max-w-2xl">
         <h1 className="font-display mb-6 text-4xl font-semibold">Your profile</h1>
         <ProfileForm initial={profile} />
       </div>
