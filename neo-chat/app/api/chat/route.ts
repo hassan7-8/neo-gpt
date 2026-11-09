@@ -1,6 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { createDataStreamResponse, streamText } from "ai";
-import { getUser } from "@/lib/supabase/get-user";
+import { getAuth } from "@/lib/supabase/get-user";
 import { guestLimited, GUEST_MESSAGE_LIMIT } from "@/lib/guest-limit";
 
 // Edge runtime starts faster than a regular serverless function.
@@ -22,7 +22,12 @@ Facts about you (always answer these exactly):
 - If someone asks who made you or who owns you, answer that your owner is MUHAMMAD.HASSAN of the Cheap Mind organization.
 - Do not claim to be made by any other company. If asked which model or technology you run on, say you are Cheap Mind AI and you do not have details about the underlying model.
 
-Style: be warm, clear and concise. Get to the point quickly and keep answers short unless the user asks for detail. Reply in the user's language.`;
+Accuracy rules:
+- Be correct above all. Think carefully before answering, and double-check numbers, dates, names and code.
+- If you are not sure, or the question needs live information you do not have (news, prices, today's date), say so plainly instead of guessing. Never invent facts, sources or links.
+- Answer exactly what was asked. If the question is unclear, ask one short clarifying question.
+
+Style: be warm, clear and concise. Lead with the answer, then add only the detail that helps. Keep replies short unless the user asks for more. Reply in the user's language.`;
 
 type ChatMessage = {
   role: string;
@@ -47,6 +52,16 @@ function messageText(message: ChatMessage | undefined): string {
   return typeof message.content === "string" ? message.content : "";
 }
 
+// Simple chat goes to the fastest model. Longer or harder questions (code, maths,
+// analysis, long prompts) go to the more accurate balanced model.
+const HARD_QUESTION =
+  /```|\b(code|debug|error|bug|function|algorithm|prove|calculate|solve|equation|math|derive|analy[sz]e|compare|essay|explain why|step[- ]by[- ]step|translate|summari[sz]e)\b/i;
+
+function pickModel(lastUserText: string) {
+  const hard = lastUserText.length > 180 || HARD_QUESTION.test(lastUserText);
+  return pollinations.chat(hard ? "openai" : "openai-fast");
+}
+
 function textResponse(text: string) {
   const usage = { promptTokens: 0, completionTokens: 0 };
   return createDataStreamResponse({
@@ -61,8 +76,8 @@ function textResponse(text: string) {
 }
 
 export async function POST(req: Request) {
-  const { configured, user } = await getUser();
-  const guest = configured && !user;
+  const { configured, signedIn } = await getAuth();
+  const guest = configured && !signedIn;
   const { messages } = await req.json();
 
   // Nano Image button: the browser sends this header while the button is on.
@@ -89,10 +104,13 @@ export async function POST(req: Request) {
     );
   }
 
+  // Sending only the recent turns keeps the prompt small, which makes replies start faster.
+  const recent = messages.slice(-12);
+
   const result = streamText({
-    model: pollinations.chat("openai-fast"),
+    model: pickModel(messageText(last)),
     system: SYSTEM_PROMPT,
-    messages,
+    messages: recent,
     maxTokens: 900,
   });
   return result.toDataStreamResponse();
