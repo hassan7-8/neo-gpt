@@ -10,7 +10,7 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  ["1", "Pick how to start", "Sign up with email, Google, Microsoft or Apple, or just try it as a guest."],
+  ["1", "Pick how to start", "Sign up with email, Google, Microsoft or Facebook, or just try it as a guest."],
   ["2", "Say what you need", "Write your question or idea in plain words, like you would to a friend."],
   ["3", "Get your answer", "Read the reply, ask a follow-up, or turn your idea into a picture with /image."],
 ];
@@ -18,7 +18,7 @@ const STEPS = [
 const FAQ = [
   ["Is it really free?", "Yes. You can chat as a guest with a small free allowance, and a free account gives you more, plus image generation."],
   ["Do I need to log in?", "No. Guests can try the chat right away. Logging in unlocks images and removes the guest limit."],
-  ["Is my account safe?", "Login is handled by Supabase. Passwords are never stored in our code, and you can also sign in with Google, Microsoft or Apple instead of a password."],
+  ["Is my account safe?", "Login is handled by Supabase. Passwords are never stored in our code, and you can also sign in with Google, Microsoft or Facebook instead of a password."],
 ];
 
 export const dynamic = "force-dynamic";

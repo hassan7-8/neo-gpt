@@ -3,16 +3,16 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { AppleIcon, GoogleIcon, MicrosoftIcon } from "./provider-icons";
+import { FacebookIcon, GoogleIcon, MicrosoftIcon } from "./provider-icons";
 
-type Provider = "google" | "azure" | "apple";
+type Provider = "google" | "azure" | "facebook";
 type Mode = "signup" | "login" | "reset";
 type Notice = { kind: "error" | "info"; text: string } | null;
 
 const PROVIDERS: { id: Provider; label: string; icon: React.ReactNode }[] = [
   { id: "google", label: "Google", icon: <GoogleIcon /> },
   { id: "azure", label: "Microsoft", icon: <MicrosoftIcon /> },
-  { id: "apple", label: "Apple", icon: <AppleIcon /> },
+  { id: "facebook", label: "Facebook", icon: <FacebookIcon /> },
 ];
 
 const inputClass =
