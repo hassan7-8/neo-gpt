@@ -7,7 +7,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-playfair), Georgia, 'Times New Roman', serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Cheap Mind AI brand palette */
@@ -19,6 +19,7 @@
   --color-sky: var(--sky);
   --color-butter: var(--butter);
   --color-plum: var(--plum);
+  --color-gold-deep: var(--gold-deep);
 
   --shadow-pop: 8px 8px 0 0 var(--shadow-ink-15);
   --shadow-pop-lg: 10px 10px 0 0 var(--shadow-ink-25);
@@ -66,14 +67,16 @@
 :root {
   --radius: 0.875rem;
 
-  --cream: oklch(0.975 0.018 90);
+  --cream: oklch(0.972 0.014 88);
   --paper: oklch(1 0 0);
-  --ink: oklch(0.17 0.008 70);
-  --mint: oklch(0.8 0.2 160);
-  --coral: oklch(0.68 0.21 35);
-  --sky: oklch(0.78 0.14 225);
-  --butter: oklch(0.88 0.17 90);
-  --plum: oklch(0.68 0.22 355);
+  --ink: oklch(0.16 0.01 75);
+  /* Luxury remap: the old mint accent is now champagne gold */
+  --mint: oklch(0.82 0.12 88);
+  --gold-deep: oklch(0.58 0.11 80);
+  --coral: oklch(0.55 0.1 50);
+  --sky: oklch(0.72 0.05 75);
+  --butter: oklch(0.9 0.08 90);
+  --plum: oklch(0.45 0.07 20);
 
   --shadow-ink-15: oklch(0 0 0 / 0.15);
   --shadow-ink-20: oklch(0 0 0 / 0.2);
@@ -226,4 +229,22 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+
+/* Luxury finishing: gold gradient on filled gold buttons and links */
+button.bg-mint,
+a.bg-mint {
+  background-image: linear-gradient(135deg, oklch(0.9 0.1 92), oklch(0.75 0.13 80));
+  box-shadow: 0 1px 0 oklch(1 0 0 / 0.5) inset, 0 6px 18px -8px oklch(0.6 0.12 80 / 0.7);
+}
+.gold-text {
+  background-image: linear-gradient(135deg, oklch(0.86 0.11 92), oklch(0.7 0.13 78));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.gold-hairline {
+  background-image: linear-gradient(90deg, transparent, oklch(0.75 0.12 82), transparent);
+  height: 1px;
 }

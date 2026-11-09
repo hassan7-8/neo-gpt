@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { DM_Sans, Fredoka } from "next/font/google";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
-const fredoka = Fredoka({ subsets: ["latin"], variable: "--font-fredoka" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
   title: "Cheap Mind AI",
-  description: "Chat with Cheap Mind AI: fast answers and image generation in one clean screen.",
+  description: "Cheap Mind AI: a fast, refined AI assistant for answers and images, by Cheap Mind organization.",
 };
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${fredoka.variable} ${dmSans.className}`}>{children}</body>
+      <body className={`${dmSans.variable} ${playfair.variable} ${dmSans.className}`}>{children}</body>
     </html>
   );
 }

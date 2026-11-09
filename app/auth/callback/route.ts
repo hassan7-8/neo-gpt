@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { authConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
-// Landing point for Google / Microsoft / Apple sign-in and email confirmation links.
+// Landing point for Google / LinkedIn / Facebook sign-in and email confirmation links.
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");

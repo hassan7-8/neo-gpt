@@ -7,10 +7,20 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar";
 import { Logo } from "@/components/Logo";
 import { UserMenu } from "@/components/auth/user-menu";
+import { NanoImageProvider, useNanoImage } from "@/lib/nano-image";
 
-export const Assistant = () => {
+export const Assistant = () => (
+  <NanoImageProvider>
+    <AssistantInner />
+  </NanoImageProvider>
+);
+
+const AssistantInner = () => {
+  const { nanoRef } = useNanoImage();
   const runtime = useChatRuntime({
     api: "/api/chat",
+    // Read on every request, so the Nano Image button takes effect immediately.
+    headers: async () => ({ "x-nano-image": nanoRef.current ? "1" : "0" }),
   });
 
   return (

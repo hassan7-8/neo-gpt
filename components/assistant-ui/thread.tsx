@@ -12,11 +12,13 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CopyIcon,
+  ImageIcon,
   PencilIcon,
   RefreshCwIcon,
   SendHorizontalIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNanoImage } from "@/lib/nano-image";
 
 import { Button } from "@/components/ui/button";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
@@ -87,8 +89,8 @@ const ThreadWelcome: FC = () => {
           </div>
           <h1 className="font-display text-3xl font-semibold sm:text-4xl">What&apos;s on your mind?</h1>
           <p className="text-muted-foreground mt-3 max-w-[42ch] text-pretty text-sm">
-            Ask me anything, or type <code className="bg-ink/5 rounded-md px-1.5 py-0.5 font-semibold">/image</code>{" "}
-            and a description to draw a picture.
+            Ask me anything, or tap <span className="bg-ink/5 rounded-md px-1.5 py-0.5 font-semibold">Nano Image</span>{" "}
+            and describe a picture to create it.
           </p>
         </div>
         <ThreadWelcomeSuggestions />
@@ -100,7 +102,7 @@ const ThreadWelcome: FC = () => {
 const SUGGESTIONS = [
   "Give me 3 ideas for a weekend project",
   "Explain how the internet works, simply",
-  "/image a cat astronaut floating in space",
+  "Plan a relaxed 3-day trip to Istanbul",
   "Help me write a friendly follow-up email",
 ];
 
@@ -124,12 +126,13 @@ const ThreadWelcomeSuggestions: FC = () => {
 };
 
 const Composer: FC = () => {
+  const { nano } = useNanoImage();
   return (
     <ComposerPrimitive.Root className="bg-paper ring-ink/5 focus-within:ring-mint flex w-full flex-wrap items-end rounded-2xl px-2.5 shadow-sm ring-1 transition focus-within:ring-2">
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
-        placeholder="Message Cheap Mind AI…"
+        placeholder={nano ? "Describe the image you want…" : "Message Cheap Mind AI…"}
         className="placeholder:text-muted-foreground max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
       />
       <ComposerAction />
@@ -137,9 +140,30 @@ const Composer: FC = () => {
   );
 };
 
+const NanoImageButton: FC = () => {
+  const { nano, setNano } = useNanoImage();
+  return (
+    <button
+      type="button"
+      onClick={() => setNano(!nano)}
+      aria-pressed={nano}
+      title={nano ? "Nano Image is on: your next message creates a picture" : "Turn on Nano Image to create a picture"}
+      className={`press my-2.5 mr-1 inline-flex h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-semibold ring-1 transition-colors ${
+        nano
+          ? "bg-mint text-ink ring-gold-deep/40"
+          : "bg-paper text-ink/70 ring-ink/10 hover:text-ink"
+      }`}
+    >
+      <ImageIcon className="size-4" />
+      Nano Image
+    </button>
+  );
+};
+
 const ComposerAction: FC = () => {
   return (
     <>
+      <NanoImageButton />
       <ThreadPrimitive.If running={false}>
         <ComposerPrimitive.Send asChild>
           <TooltipIconButton
