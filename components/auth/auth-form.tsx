@@ -3,16 +3,9 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import {
-  AppleIcon,
-  DiscordIcon,
-  FacebookIcon,
-  GithubIcon,
-  GoogleIcon,
-  MicrosoftIcon,
-} from "./provider-icons";
+import { AppleIcon, GoogleIcon, MicrosoftIcon } from "./provider-icons";
 
-type Provider = "google" | "azure" | "apple" | "github" | "discord" | "facebook";
+type Provider = "google" | "azure" | "apple";
 type Mode = "signup" | "login" | "reset";
 type Notice = { kind: "error" | "info"; text: string } | null;
 
@@ -20,12 +13,6 @@ const PROVIDERS: { id: Provider; label: string; icon: React.ReactNode }[] = [
   { id: "google", label: "Google", icon: <GoogleIcon /> },
   { id: "azure", label: "Microsoft", icon: <MicrosoftIcon /> },
   { id: "apple", label: "Apple", icon: <AppleIcon /> },
-];
-
-const MORE_PROVIDERS: { id: Provider; label: string; icon: React.ReactNode }[] = [
-  { id: "github", label: "GitHub", icon: <GithubIcon /> },
-  { id: "discord", label: "Discord", icon: <DiscordIcon /> },
-  { id: "facebook", label: "Facebook", icon: <FacebookIcon /> },
 ];
 
 const inputClass =
@@ -154,21 +141,6 @@ export function AuthForm({
           >
             {p.icon}
             Continue with {p.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-2 grid grid-cols-3 gap-2">
-        {MORE_PROVIDERS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            onClick={() => void oauth(p.id)}
-            aria-label={`Continue with ${p.label}`}
-            className="press lift bg-paper ring-ink/5 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium ring-1"
-          >
-            {p.icon}
-            <span className="hidden sm:inline">{p.label}</span>
           </button>
         ))}
       </div>
