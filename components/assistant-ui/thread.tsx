@@ -19,7 +19,8 @@ import {
   SendHorizontalIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useNanoImage } from "@/lib/nano-image";
+import { IMAGE_STYLES, PERSONAS, useNanoImage } from "@/lib/nano-image";
+import { MicButton, SpeakButton } from "@/components/assistant-ui/voice";
 
 import { Button } from "@/components/ui/button";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
@@ -84,7 +85,7 @@ const ThreadScrollToBottom: FC = () => {
 const ThreadWelcome: FC = () => {
   return (
     <ThreadPrimitive.Empty>
-      <div className="flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
+      <div className="flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col pb-4">
         <div className="anim-slideup flex w-full flex-grow flex-col items-center justify-center text-center">
           <div className="anim-floaty bg-mint shadow-pop ring-ink/5 mb-5 flex size-16 items-center justify-center rounded-3xl text-3xl ring-1">
             ✦
@@ -95,6 +96,7 @@ const ThreadWelcome: FC = () => {
             and describe a picture to create it.
           </p>
         </div>
+        <PersonaPicker />
         <ThreadWelcomeSuggestions />
       </div>
     </ThreadPrimitive.Empty>
@@ -102,11 +104,37 @@ const ThreadWelcome: FC = () => {
 };
 
 const SUGGESTIONS = [
-  "Give me 3 ideas for a weekend project",
-  "Explain how the internet works, simply",
-  "Plan a relaxed 3-day trip to Istanbul",
-  "Help me write a friendly follow-up email",
+  "Make my CV: ask me what you need to know",
+  "Write 3 Instagram captions for a travel photo",
+  "Explain this homework topic simply: photosynthesis",
+  "Translate to Urdu: Good morning, how are you?",
+  "Make a 7-day study plan for my exams",
+  "Fix the English in my email and make it polite",
 ];
+
+const PersonaPicker: FC = () => {
+  const { persona, setPersona } = useNanoImage();
+  return (
+    <div className="mt-6 w-full">
+      <p className="text-muted-foreground mb-2 text-center text-xs font-semibold uppercase tracking-wide">Choose a helper</p>
+      <div className="flex flex-wrap justify-center gap-2">
+        {PERSONAS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            aria-pressed={persona === p.id}
+            onClick={() => setPersona(persona === p.id ? "" : p.id)}
+            className={`press rounded-xl px-3 py-1.5 text-sm font-semibold ring-1 transition-colors ${
+              persona === p.id ? "bg-mint text-ink ring-gold-deep/40" : "bg-paper/90 text-ink/75 ring-ink/10"
+            }`}
+          >
+            <span aria-hidden>{p.emoji}</span> {p.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const ThreadWelcomeSuggestions: FC = () => {
   return (
@@ -128,18 +156,43 @@ const ThreadWelcomeSuggestions: FC = () => {
 };
 
 const Composer: FC = () => {
-  const { nano, photos } = useNanoImage();
+  const { nano, photos, persona } = useNanoImage();
+  const personaLabel = PERSONAS.find((p) => p.id === persona)?.label;
   return (
     <ComposerPrimitive.Root className="bg-paper ring-ink/5 focus-within:ring-mint flex w-full flex-wrap items-end rounded-2xl px-2.5 shadow-sm ring-1 transition focus-within:ring-2">
       <PhotoStrip />
+      {nano && photos.length === 0 && <StyleChips />}
       <ComposerPrimitive.Input
         rows={1}
+        dir="auto"
         autoFocus
-        placeholder={photos.length > 0 ? "What should I change in the photo?" : nano ? "Describe the image you want…" : "Message Cheap Mind AI…"}
+        placeholder={photos.length > 0 ? "What should I change in the photo?" : nano ? "Describe the image you want…" : personaLabel ? `Message ${personaLabel}…` : "Message Cheap Mind AI…"}
         className="placeholder:text-muted-foreground max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
       />
       <ComposerAction />
     </ComposerPrimitive.Root>
+  );
+};
+
+const StyleChips: FC = () => {
+  const { style, setStyle } = useNanoImage();
+  return (
+    <div className="flex w-full basis-full flex-wrap items-center gap-1.5 px-2 pt-3">
+      <span className="text-ink/55 mr-1 text-xs font-semibold">Style</span>
+      {IMAGE_STYLES.map((st) => (
+        <button
+          key={st.id}
+          type="button"
+          aria-pressed={style === st.id}
+          onClick={() => setStyle(style === st.id ? "" : st.id)}
+          className={`press rounded-lg px-2.5 py-1 text-xs font-semibold ring-1 ${
+            style === st.id ? "bg-mint text-ink ring-gold-deep/40" : "bg-paper text-ink/70 ring-ink/10"
+          }`}
+        >
+          {st.label}
+        </button>
+      ))}
+    </div>
   );
 };
 
@@ -167,6 +220,7 @@ const ComposerAction: FC = () => {
   return (
     <>
       <PhotoAttachButton />
+      <MicButton />
       <NanoImageButton />
       <ThreadPrimitive.If running={false}>
         <ComposerPrimitive.Send asChild>
@@ -216,7 +270,7 @@ const UserMessage: FC = () => {
 
       <div className="anim-slideup bg-sky/25 ring-ink/5 text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words rounded-3xl rounded-br-lg px-5 py-2.5 ring-1 col-start-2 row-start-2">
         <SentPhotos />
-        <MessagePrimitive.Content />
+        <div dir="auto"><MessagePrimitive.Content /></div>
       </div>
 
       <BranchPicker className="col-span-full col-start-1 row-start-3 -mr-1 justify-end" />
@@ -261,9 +315,11 @@ const AssistantMessage: FC = () => {
   return (
     <MessagePrimitive.Root className="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr] relative w-full max-w-[var(--thread-max-width)] py-4">
       <div className="anim-slideup bg-paper shadow-pop-sm ring-ink/5 text-foreground max-w-[calc(var(--thread-max-width)*0.85)] break-words rounded-3xl rounded-bl-lg px-5 py-3 text-sm leading-7 ring-1 col-span-2 col-start-2 row-start-1 my-1.5">
-        <MessagePrimitive.Content
-          components={{ Text: MarkdownText, tools: { Fallback: ToolFallback } }}
-        />
+        <div dir="auto">
+          <MessagePrimitive.Content
+            components={{ Text: MarkdownText, tools: { Fallback: ToolFallback } }}
+          />
+        </div>
       </div>
 
       <AssistantActionBar />
@@ -291,6 +347,7 @@ const AssistantActionBar: FC = () => {
           </MessagePrimitive.If>
         </TooltipIconButton>
       </ActionBarPrimitive.Copy>
+      <SpeakButton />
       <ActionBarPrimitive.Reload asChild>
         <TooltipIconButton tooltip="Refresh">
           <RefreshCwIcon />

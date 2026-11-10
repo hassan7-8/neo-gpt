@@ -8,6 +8,8 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar";
 import { Logo } from "@/components/Logo";
 import { UserMenu } from "@/components/auth/user-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { TypingSoundToggle } from "@/components/typing-sound";
 import { NanoImageProvider, useNanoImage } from "@/lib/nano-image";
 
 export const Assistant = () => (
@@ -17,7 +19,7 @@ export const Assistant = () => (
 );
 
 const AssistantInner = () => {
-  const { nanoRef, takePhotos, recordSent } = useNanoImage();
+  const { nanoRef, takePhotos, recordSent, personaRef, styleRef } = useNanoImage();
   const runtimeRef = useRef<{ thread: { getState: () => { messages: readonly { id: string; role: string }[] } } } | null>(null);
   const runtime = useChatRuntime({
     api: "/api/chat",
@@ -31,6 +33,8 @@ const AssistantInner = () => {
       }
       return {
         "x-nano-image": nanoRef.current ? "1" : "0",
+        "x-persona": personaRef.current,
+        "x-style": styleRef.current,
         // Attached photos switch the request into photo-edit mode.
         "x-edit-images": photos.map((p) => p.url).join(","),
         "x-edit-paths": photos.map((p) => p.path).join(","),
@@ -50,7 +54,11 @@ const AssistantInner = () => {
               <SidebarTrigger />
               <Logo />
             </div>
-            <UserMenu />
+            <div className="flex items-center gap-2">
+              <TypingSoundToggle />
+              <ThemeToggle />
+              <UserMenu />
+            </div>
           </header>
           <Thread />
         </SidebarInset>
