@@ -17,6 +17,9 @@ type NanoImageContext = {
   removePhoto: (path: string) => void;
   /** Returns the attached photos and clears them (called when a message is sent). */
   takePhotos: () => UploadedPhoto[];
+  /** Photos shown inside sent messages, by message id (previews live for this visit). */
+  sentPhotos: Record<string, string[]>;
+  recordSent: (messageId: string, previews: string[]) => void;
 };
 
 const Ctx = createContext<NanoImageContext | null>(null);
@@ -26,6 +29,11 @@ export function NanoImageProvider({ children }: { children: ReactNode }) {
   const nanoRef = useRef(false);
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
   const photosRef = useRef<UploadedPhoto[]>([]);
+
+  const [sentPhotos, setSentPhotos] = useState<Record<string, string[]>>({});
+  const recordSent = useCallback((id: string, previews: string[]) => {
+    setSentPhotos((m) => ({ ...m, [id]: previews }));
+  }, []);
 
   const setNano = useCallback((on: boolean) => {
     nanoRef.current = on;
@@ -47,8 +55,8 @@ export function NanoImageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ nano, setNano, nanoRef, photos, addPhoto, removePhoto, takePhotos }),
-    [nano, setNano, photos, addPhoto, removePhoto, takePhotos],
+    () => ({ nano, setNano, nanoRef, photos, addPhoto, removePhoto, takePhotos, sentPhotos, recordSent }),
+    [nano, setNano, photos, addPhoto, removePhoto, takePhotos, sentPhotos, recordSent],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

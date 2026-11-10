@@ -37,7 +37,7 @@ export function GeneratedImage({ src, alt }: { src: string; alt: string }) {
 
   return (
     <span className="my-3 block w-full max-w-sm">
-      <span className="bg-muted ring-ink/10 relative block aspect-square w-full overflow-hidden rounded-2xl ring-1">
+      <span className={`bg-muted ring-ink/10 relative block w-full overflow-hidden rounded-2xl ring-1 ${isEdit && status === "done" ? "" : "aspect-square"}`}>
         {/* Always rendered so the browser keeps loading it; hidden until ready. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -46,7 +46,7 @@ export function GeneratedImage({ src, alt }: { src: string; alt: string }) {
           alt={alt}
           onLoad={() => setStatus("done")}
           onError={() => setStatus("error")}
-          className={`absolute inset-0 size-full ${isEdit ? "object-contain" : "object-cover"} transition-opacity duration-500 ${
+          className={`${isEdit && status === "done" ? "relative block h-auto w-full" : "absolute inset-0 size-full object-cover"} transition-opacity duration-500 ${
             status === "done" ? "opacity-100" : "opacity-0"
           }`}
         />

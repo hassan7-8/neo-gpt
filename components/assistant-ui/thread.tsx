@@ -3,6 +3,7 @@ import {
   BranchPickerPrimitive,
   ComposerPrimitive,
   MessagePrimitive,
+  useMessage,
   ThreadPrimitive,
 } from "@assistant-ui/react";
 import type { FC } from "react";
@@ -193,12 +194,28 @@ const ComposerAction: FC = () => {
   );
 };
 
+const SentPhotos: FC = () => {
+  const id = useMessage((m) => m.id);
+  const { sentPhotos } = useNanoImage();
+  const photos = sentPhotos[id];
+  if (!photos?.length) return null;
+  return (
+    <div className="mb-2 flex flex-wrap justify-end gap-2">
+      {photos.map((src, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img key={i} src={src} alt={`Your photo ${i + 1}`} className="ring-ink/10 max-h-64 max-w-[16rem] rounded-2xl object-cover ring-1" />
+      ))}
+    </div>
+  );
+};
+
 const UserMessage: FC = () => {
   return (
     <MessagePrimitive.Root className="grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 [&:where(>*)]:col-start-2 w-full max-w-[var(--thread-max-width)] py-4">
       <UserActionBar />
 
       <div className="anim-slideup bg-sky/25 ring-ink/5 text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words rounded-3xl rounded-br-lg px-5 py-2.5 ring-1 col-start-2 row-start-2">
+        <SentPhotos />
         <MessagePrimitive.Content />
       </div>
 

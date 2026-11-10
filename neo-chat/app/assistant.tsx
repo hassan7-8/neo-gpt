@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
@@ -16,12 +17,18 @@ export const Assistant = () => (
 );
 
 const AssistantInner = () => {
-  const { nanoRef, takePhotos } = useNanoImage();
+  const { nanoRef, takePhotos, recordSent } = useNanoImage();
+  const runtimeRef = useRef<{ thread: { getState: () => { messages: readonly { id: string; role: string }[] } } } | null>(null);
   const runtime = useChatRuntime({
     api: "/api/chat",
     // Read on every request, so the Nano Image button takes effect immediately.
     headers: async () => {
       const photos = takePhotos();
+      if (photos.length > 0) {
+        // Show the sent photos inside the user's message bubble.
+        const last = runtimeRef.current?.thread.getState().messages.filter((m) => m.role === "user").at(-1);
+        if (last) recordSent(last.id, photos.map((p) => p.preview));
+      }
       return {
         "x-nano-image": nanoRef.current ? "1" : "0",
         // Attached photos switch the request into photo-edit mode.
@@ -30,6 +37,8 @@ const AssistantInner = () => {
       };
     },
   });
+
+  runtimeRef.current = runtime;
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
