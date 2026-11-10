@@ -33,18 +33,13 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
         {/* Ad network scripts */}
-        <Script
-          src="https://bauval.org/14/1b05e1ecca02062bc43a54ef7bcccb8a"
-          data-cfasync="false"
-          strategy="afterInteractive"
-        />
-        <Script
-          src="https://abscloud.org/1/0b0c3f336d2a85410c852071f13d646e"
-          data-cfasync="false"
-          strategy="afterInteractive"
-        />
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script data-cfasync="false" src="https://abscloud.org/1/0b0c3f336d2a85410c852071f13d646e"></script>
       </head>
-      <body className={`${dmSans.variable} ${playfair.variable} ${dmSans.className}`}>{children}</body>
+      <body className={`${dmSans.variable} ${playfair.variable} ${dmSans.className}`}>{children}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script data-cfasync="false" src="https://bauval.org/14/1b05e1ecca02062bc43a54ef7bcccb8a"></script>
+      </body>
     </html>
   );
 }
