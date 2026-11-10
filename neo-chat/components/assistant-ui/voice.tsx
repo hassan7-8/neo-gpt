@@ -10,16 +10,26 @@ type SpeechRec = {
   continuous: boolean;
   onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void) | null;
   onend: (() => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((e: { error?: string }) => void) | null;
   start: () => void;
   stop: () => void;
 };
 type RecCtor = new () => SpeechRec;
 
 const LANGS = [
-  { code: "en-US", label: "EN" },
-  { code: "ur-PK", label: "اردو" },
+  { code: "en-US", label: "EN", name: "English" },
+  { code: "ur-PK", label: "اردو", name: "Urdu" },
+  { code: "hi-IN", label: "हिं", name: "Hindi (also understands spoken Urdu)" },
 ] as const;
+
+const ERRORS: Record<string, string> = {
+  "not-allowed": "Microphone is blocked. Click the lock icon next to the web address, allow Microphone, then try again.",
+  "service-not-allowed": "This browser blocked voice typing. Try Chrome or Edge.",
+  "no-speech": "I didn't hear anything. Tap the mic and speak again.",
+  "audio-capture": "No microphone was found on this device.",
+  network: "Voice typing needs an internet connection. Check it and try again.",
+  "language-not-supported": "This browser can't do voice typing in that language. Try Chrome, or switch the language button.",
+};
 
 /** Speak instead of typing. Works in browsers that support speech recognition (Chrome, Edge, Android). */
 export const MicButton: FC = () => {
@@ -27,6 +37,7 @@ export const MicButton: FC = () => {
   const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
   const [lang, setLang] = useState<(typeof LANGS)[number]["code"]>("en-US");
+  const [problem, setProblem] = useState("");
   const rec = useRef<SpeechRec | null>(null);
 
   useEffect(() => {
@@ -39,6 +50,7 @@ export const MicButton: FC = () => {
 
   function toggle() {
     if (listening) return rec.current?.stop();
+    setProblem("");
     const w = window as unknown as { SpeechRecognition?: RecCtor; webkitSpeechRecognition?: RecCtor };
     const Ctor = (w.SpeechRecognition ?? w.webkitSpeechRecognition) as RecCtor;
     const r = new Ctor();
@@ -51,13 +63,22 @@ export const MicButton: FC = () => {
       composer.setText(base ? `${base} ${text}` : text);
     };
     r.onend = () => setListening(false);
-    r.onerror = () => setListening(false);
+    r.onerror = (e) => {
+      setListening(false);
+      setProblem(ERRORS[e.error ?? ""] ?? "Voice typing didn't work. Please try again.");
+    };
     rec.current = r;
     setListening(true);
     r.start();
   }
 
+  const next = () => {
+    const i = LANGS.findIndex((l) => l.code === lang);
+    return LANGS[(i + 1) % LANGS.length].code;
+  };
+
   return (
+    <>
     <span className="my-2.5 mr-1 inline-flex items-center gap-1">
       <button
         type="button"
@@ -73,13 +94,19 @@ export const MicButton: FC = () => {
       </button>
       <button
         type="button"
-        onClick={() => setLang(lang === "en-US" ? "ur-PK" : "en-US")}
-        title="Voice language"
+        onClick={() => setLang(next())}
+        title={`Voice language: ${LANGS.find((l) => l.code === lang)?.name}. Tap to change.`}
         className="press text-ink/60 hover:text-ink h-9 rounded-lg px-1.5 text-xs font-semibold"
       >
         {LANGS.find((l) => l.code === lang)?.label}
       </button>
     </span>
+    {problem && (
+      <span role="alert" className="basis-full px-2 pb-2 text-xs text-red-600">
+        {problem}
+      </span>
+    )}
+    </>
   );
 };
 
@@ -95,14 +122,17 @@ export const SpeakButton: FC = () => {
   );
   const [speaking, setSpeaking] = useState(false);
   const [ok, setOk] = useState(false);
+  const [note, setNote] = useState("");
 
   useEffect(() => {
     setOk("speechSynthesis" in window);
+    window.speechSynthesis?.getVoices(); // starts loading the voice list
     return () => window.speechSynthesis?.cancel();
   }, []);
 
   if (!ok || !text) return null;
   return (
+    <>
     <button
       type="button"
       title={speaking ? "Stop" : "Read aloud"}
@@ -114,7 +144,19 @@ export const SpeakButton: FC = () => {
         }
         synth.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        u.lang = /[؀-ۿ]/.test(text) ? "ur-PK" : "en-US";
+        const lang = /[\u0600-\u06FF]/.test(text) ? "ur-PK" : "en-US";
+        const voices = synth.getVoices();
+        const voice =
+          voices.find((v) => v.lang.replace("_", "-").toLowerCase() === lang.toLowerCase()) ??
+          voices.find((v) => v.lang.toLowerCase().startsWith(lang.slice(0, 2)));
+        if (lang === "ur-PK" && !voice) {
+          setNote("No Urdu voice on this device. Windows: Settings > Time & language > Speech > Add voices > Urdu. Edge also has free Urdu voices.");
+          setTimeout(() => setNote(""), 8000);
+          return;
+        }
+        setNote("");
+        if (voice) u.voice = voice;
+        u.lang = voice?.lang ?? lang;
         u.onend = () => setSpeaking(false);
         u.onerror = () => setSpeaking(false);
         setSpeaking(true);
@@ -125,5 +167,7 @@ export const SpeakButton: FC = () => {
       {speaking ? <SquareIcon className="size-4" /> : <Volume2Icon className="size-4" />}
       <span className="sr-only">Read aloud</span>
     </button>
+    {note && <span role="alert" className="text-coral ml-2 max-w-xs text-xs">{note}</span>}
+    </>
   );
 };
