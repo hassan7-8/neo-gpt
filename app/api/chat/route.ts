@@ -24,6 +24,7 @@ About you:
 Accuracy rules:
 - Be correct above all. Think carefully before answering, and double-check numbers, dates, names and code.
 - If you are not sure, or the question needs live information you do not have (news, prices, today's date), say so plainly instead of guessing. Never invent facts, sources or links.
+- If the user writes in Urdu or Roman Urdu, reply in the same language and style.
 - Answer exactly what was asked. If the question is unclear, ask one short clarifying question.
 
 Style: be warm, clear and concise. Lead with the answer, then add only the detail that helps. Keep replies short unless the user asks for more. Reply in the user's language.`;
@@ -60,6 +61,23 @@ function pickModel(lastUserText: string) {
   const hard = lastUserText.length > 180 || HARD_QUESTION.test(lastUserText);
   return pollinations.chat(hard ? "openai" : "openai-fast");
 }
+
+const PERSONA_PROMPTS: Record<string, string> = {
+  study: "You are in Study Buddy mode: explain step by step with simple examples, check understanding with a short question, and be encouraging.",
+  coder: "You are in Coder mode: give correct, minimal, runnable code with a brief explanation. Mention edge cases.",
+  writer: "You are in Writer mode: help write polished, engaging text. Offer a tight draft first, then ask if they want a change.",
+  translator: "You are in Translator mode: translate between English, Urdu, Roman Urdu and other languages. Give the translation first, then a short note only if nuance matters.",
+  interview: "You are in Interview Coach mode: ask one interview question at a time, then give short feedback and a stronger sample answer.",
+};
+
+const STYLE_PROMPTS: Record<string, string> = {
+  anime: "anime style, vibrant colours, detailed line art",
+  "3d": "3D render, soft studio lighting, smooth materials",
+  watercolor: "watercolor painting, soft washes, paper texture",
+  product: "luxury product photography, studio lighting, elegant gold accents, clean background",
+  realistic: "ultra realistic photograph, natural light, sharp detail",
+  pixel: "pixel art, retro game style, limited palette",
+};
 
 const TONES: Record<string, string> = {
   friendly: "warm and friendly",
@@ -132,9 +150,10 @@ export async function POST(req: Request) {
       );
     }
     const prompt = messageText(last).trim().slice(0, 500);
+    const styleText = STYLE_PROMPTS[req.headers.get("x-style") ?? ""];
     if (!prompt) return textResponse("Describe the picture you want, for example: a cat astronaut floating in space.");
     const seed = Math.floor(Math.random() * 1_000_000);
-    const src = `/api/image?prompt=${encodeURIComponent(prompt).replace(/\(/g, "%28").replace(/\)/g, "%29")}&seed=${seed}`;
+    const src = `/api/image?prompt=${encodeURIComponent(styleText ? `${prompt}, ${styleText}` : prompt).replace(/\(/g, "%28").replace(/\)/g, "%29")}&seed=${seed}`;
     const alt = prompt.replace(/[[\]\n]/g, " ");
     return textResponse(`![${alt}](${src})`);
   }
@@ -150,7 +169,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: pickModel(messageText(last)),
-    system: SYSTEM_PROMPT + personalise(meta),
+    system: SYSTEM_PROMPT + (PERSONA_PROMPTS[req.headers.get("x-persona") ?? ""] ? `\n\n${PERSONA_PROMPTS[req.headers.get("x-persona") ?? ""]}` : "") + personalise(meta),
     messages: recent,
     maxTokens: 900,
   });

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ImageIcon, RefreshCwIcon } from "lucide-react";
+import { DownloadIcon, ImageIcon, RefreshCwIcon } from "lucide-react";
 import { deleteEditPhotos } from "@/lib/upload-photo";
+import { stampImage } from "@/lib/watermark";
 
 const STATUS_STEPS = [
   { after: 0, text: "Creating your image…" },
@@ -16,6 +17,7 @@ export function GeneratedImage({ src, alt }: { src: string; alt: string }) {
   const [status, setStatus] = useState<"loading" | "done" | "error">("loading");
   const [seconds, setSeconds] = useState(0);
   const [attempt, setAttempt] = useState(0);
+  const [shown, setShown] = useState<string | null>(null);
 
   useEffect(() => {
     if (status !== "loading") return;
@@ -37,19 +39,35 @@ export function GeneratedImage({ src, alt }: { src: string; alt: string }) {
 
   return (
     <span className="my-3 block w-full max-w-sm">
-      <span className="bg-muted ring-ink/10 relative block aspect-square w-full overflow-hidden rounded-2xl ring-1">
-        {/* Always rendered so the browser keeps loading it; hidden until ready. */}
+      <span className={`bg-muted ring-ink/10 relative block w-full overflow-hidden rounded-2xl ring-1 ${isEdit && status === "done" ? "" : "aspect-square"}`}>
+        {/* Loader: keeps downloading in the background, never shown. The stamped copy is shown instead. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           key={url}
           src={url}
-          alt={alt}
-          onLoad={() => setStatus("done")}
+          alt=""
+          aria-hidden
+          onLoad={async (e) => {
+            const img = e.currentTarget;
+            try {
+              setShown(await stampImage(img));
+            } catch {
+              setShown(img.src);
+            }
+            setStatus("done");
+          }}
           onError={() => setStatus("error")}
-          className={`absolute inset-0 size-full ${isEdit ? "object-contain" : "object-cover"} transition-opacity duration-500 ${
-            status === "done" ? "opacity-100" : "opacity-0"
-          }`}
+          className="pointer-events-none absolute inset-0 size-full opacity-0"
         />
+        {shown && status === "done" && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={shown}
+            alt={alt}
+            draggable={false}
+            className={`${isEdit ? "relative block h-auto w-full" : "absolute inset-0 size-full object-cover"} anim-pop`}
+          />
+        )}
 
         {status === "loading" && (
           <span
@@ -94,8 +112,15 @@ export function GeneratedImage({ src, alt }: { src: string; alt: string }) {
           </span>
         )}
       </span>
-      {status === "done" && alt && (
-        <span className="text-ink/50 mt-1.5 block text-xs">{isEdit ? "Nano Edit" : "Nano Image"} · {alt}</span>
+      {status === "done" && (
+        <span className="text-ink/50 mt-1.5 flex items-center justify-between gap-3 text-xs">
+          <span className="truncate">{isEdit ? "Nano Edit" : "Nano Image"}{alt ? ` · ${alt}` : ""}</span>
+          {shown && (
+            <a href={shown} download="cheap-mind-ai.jpg" className="press ring-ink/10 hover:text-ink inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 font-semibold ring-1">
+              <DownloadIcon className="size-3.5" /> Save
+            </a>
+          )}
+        </span>
       )}
     </span>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
@@ -7,6 +8,8 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar";
 import { Logo } from "@/components/Logo";
 import { UserMenu } from "@/components/auth/user-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { TypingSoundToggle } from "@/components/typing-sound";
 import { NanoImageProvider, useNanoImage } from "@/lib/nano-image";
 
 export const Assistant = () => (
@@ -16,20 +19,30 @@ export const Assistant = () => (
 );
 
 const AssistantInner = () => {
-  const { nanoRef, takePhotos } = useNanoImage();
+  const { nanoRef, takePhotos, recordSent, personaRef, styleRef } = useNanoImage();
+  const runtimeRef = useRef<{ thread: { getState: () => { messages: readonly { id: string; role: string }[] } } } | null>(null);
   const runtime = useChatRuntime({
     api: "/api/chat",
     // Read on every request, so the Nano Image button takes effect immediately.
     headers: async () => {
       const photos = takePhotos();
+      if (photos.length > 0) {
+        // Show the sent photos inside the user's message bubble.
+        const last = runtimeRef.current?.thread.getState().messages.filter((m) => m.role === "user").at(-1);
+        if (last) recordSent(last.id, photos.map((p) => p.preview));
+      }
       return {
         "x-nano-image": nanoRef.current ? "1" : "0",
+        "x-persona": personaRef.current,
+        "x-style": styleRef.current,
         // Attached photos switch the request into photo-edit mode.
         "x-edit-images": photos.map((p) => p.url).join(","),
         "x-edit-paths": photos.map((p) => p.path).join(","),
       };
     },
   });
+
+  runtimeRef.current = runtime;
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
@@ -41,7 +54,11 @@ const AssistantInner = () => {
               <SidebarTrigger />
               <Logo />
             </div>
-            <UserMenu />
+            <div className="flex items-center gap-2">
+              <TypingSoundToggle />
+              <ThemeToggle />
+              <UserMenu />
+            </div>
           </header>
           <Thread />
         </SidebarInset>

@@ -2,7 +2,8 @@
 
 import { useRef, useState, type FC } from "react";
 import { ImagePlusIcon, Loader2Icon, XIcon } from "lucide-react";
-import { MAX_EDIT_PHOTOS, useNanoImage } from "@/lib/nano-image";
+import { useComposerRuntime } from "@assistant-ui/react";
+import { MAX_EDIT_PHOTOS, PHOTO_TOOLS, useNanoImage } from "@/lib/nano-image";
 import { deleteEditPhotos, uploadEditPhoto } from "@/lib/upload-photo";
 
 /** Small "Add photo" button for Nano Edit. */
@@ -61,6 +62,7 @@ export const PhotoAttachButton: FC = () => {
 /** Thumbnails of attached photos, shown above the text box. */
 export const PhotoStrip: FC = () => {
   const { photos, removePhoto } = useNanoImage();
+  const composer = useComposerRuntime();
   if (photos.length === 0) return null;
   return (
     <div className="flex w-full basis-full flex-wrap items-center gap-2 px-2 pt-3">
@@ -86,6 +88,18 @@ export const PhotoStrip: FC = () => {
           ? "Now type what to change. Add a 2nd photo (e.g. clothes) for try-on."
           : "Photo 1 = the person, photo 2 = the clothes. Type: “Put the clothes from photo 2 on the person in photo 1”."}
       </span>
+      <div className="flex w-full flex-wrap gap-1.5">
+        {PHOTO_TOOLS.map((t) => (
+          <button
+            key={t.label}
+            type="button"
+            onClick={() => composer.setText(t.prompt)}
+            className="press bg-paper text-ink/75 ring-ink/10 rounded-lg px-2.5 py-1 text-xs font-semibold ring-1"
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
