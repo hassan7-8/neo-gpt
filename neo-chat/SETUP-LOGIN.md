@@ -27,3 +27,10 @@ Paste that into the provider's console.
   settings -> Set up. App permissions: Read. Type of app: Web App. Callback URI = the Supabase callback URL (Supabase ->
   Authentication -> Providers -> X). Website URL = your site. Save, then open "Keys and tokens" -> OAuth 2.0 Client ID and
   Client Secret and paste both into Supabase (X / Twitter (OAuth 2.0) provider), then Enable.
+
+## Photo editing, profile pictures and saved chats (one-time SQL)
+
+In Supabase open SQL Editor -> New query, paste the file, press Run:
+
+1. `supabase/storage.sql` - photo uploads and profile pictures.
+2. `supabase/chats.sql` - saved chats, search and share links.

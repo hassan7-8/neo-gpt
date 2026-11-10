@@ -8,6 +8,8 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar";
 import { Logo } from "@/components/Logo";
 import { UserMenu } from "@/components/auth/user-menu";
+import { SavedChatsProvider } from "@/lib/saved-chats";
+import { ShareChatButton } from "@/components/assistant-ui/saved-chats";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TypingSoundToggle } from "@/components/typing-sound";
 import { NanoImageProvider, useNanoImage } from "@/lib/nano-image";
@@ -46,6 +48,7 @@ const AssistantInner = () => {
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
+      <SavedChatsProvider>
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
@@ -55,6 +58,7 @@ const AssistantInner = () => {
               <Logo />
             </div>
             <div className="flex items-center gap-2">
+              <ShareChatButton />
               <TypingSoundToggle />
               <ThemeToggle />
               <UserMenu />
@@ -63,6 +67,7 @@ const AssistantInner = () => {
           <Thread />
         </SidebarInset>
       </SidebarProvider>
+      </SavedChatsProvider>
     </AssistantRuntimeProvider>
   );
 };
