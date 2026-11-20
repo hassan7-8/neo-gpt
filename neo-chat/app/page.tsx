@@ -25,6 +25,18 @@ const FAQ = [
 
 export const dynamic = "force-dynamic";
 
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Cheap Mind AI",
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: "Any",
+  description: "A free AI assistant for chat, image generation and photo editing, with English and Urdu support.",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  publisher: { "@type": "Organization", name: "Cheap Mind organization" },
+};
+
+
 export default async function Home() {
   const { configured, user } = await getUser();
   if (configured && user) redirect("/chat");
@@ -75,6 +87,7 @@ export default async function Home() {
       </div>
 
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
         <main>
           <section aria-labelledby="features" className="py-16">
             <p className="text-gold-deep mb-3 text-center text-xs font-semibold uppercase tracking-[0.25em]">Features</p>
