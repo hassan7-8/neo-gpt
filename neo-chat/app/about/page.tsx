@@ -4,7 +4,8 @@ import { Logo } from "@/components/Logo";
 import { CONTACT_EMAIL, SiteFooter } from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "About — Cheap Mind AI",
+  title: "About",
+  alternates: { canonical: "/about" },
   description:
     "Cheap Mind AI is a fast, refined AI assistant created by MUHAMMAD.HASSAN of the Cheap Mind organization.",
 };

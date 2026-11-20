@@ -24,13 +24,11 @@ export const metadata: Metadata = {
     "AI for students",
   ],
   applicationName: "Cheap Mind AI",
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     siteName: "Cheap Mind AI",
     title: "Cheap Mind AI: Free AI Chat, Image Generator & Photo Editor",
     description: "Chat, create images and edit photos with a fast, free AI assistant. English and Urdu supported.",
-    url: "/",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Cheap Mind AI" }],
   },
   twitter: {
