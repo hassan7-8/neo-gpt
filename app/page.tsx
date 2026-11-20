@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Logo } from "@/components/Logo";
@@ -22,6 +23,11 @@ const FAQ = [
   ["Who owns Cheap Mind AI?", "Cheap Mind AI is owned and created by MUHAMMAD.HASSAN of the Cheap Mind organization."],
   ["Is my account safe?", "Login is handled by Supabase. We never store passwords in our code, and you can sign in with Google or X instead of a password."],
 ];
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { url: "/" },
+};
 
 export const dynamic = "force-dynamic";
 
