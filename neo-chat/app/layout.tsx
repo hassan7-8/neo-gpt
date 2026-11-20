@@ -49,6 +49,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta
+          name="google-site-verification"
+          content="UrUZ-nqxdKB5WZkoimEGyxPtGy0IG5PYj_KS4QD1Rso"
+        />
         {/* Ad network scripts */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script data-cfasync="false" src="https://abscloud.org/1/0b0c3f336d2a85410c852071f13d646e"></script>
