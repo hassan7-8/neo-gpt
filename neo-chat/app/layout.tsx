@@ -5,9 +5,40 @@ import "./globals.css";
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dark-synapse.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Cheap Mind AI",
-  description: "Cheap Mind AI: a fast, refined AI assistant for answers and images, by Cheap Mind organization.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Cheap Mind AI: Free AI Chat, Image Generator & Photo Editor",
+    template: "%s | Cheap Mind AI",
+  },
+  description:
+    "Cheap Mind AI is a free, fast AI assistant. Chat in English or Urdu, create images with Nano Image, edit photos, and save your chats. By Cheap Mind organization.",
+  keywords: [
+    "Cheap Mind AI",
+    "free AI chat",
+    "AI image generator",
+    "AI photo editor",
+    "Urdu AI chatbot",
+    "AI for students",
+  ],
+  applicationName: "Cheap Mind AI",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "Cheap Mind AI",
+    title: "Cheap Mind AI: Free AI Chat, Image Generator & Photo Editor",
+    description: "Chat, create images and edit photos with a fast, free AI assistant. English and Urdu supported.",
+    url: "/",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Cheap Mind AI" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cheap Mind AI",
+    description: "Free AI chat, image generator and photo editor.",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({
